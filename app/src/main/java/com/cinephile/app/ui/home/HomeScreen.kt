@@ -14,54 +14,32 @@ import androidx.compose.ui.unit.dp
 import com.cinephile.app.domain.model.MediaItem
 import com.cinephile.app.ui.components.ErrorState
 import com.cinephile.app.ui.components.LoadingState
-import com.cicardRowMediaRow
 import com.cinephile.app.ui.components.MediaRow
 
 @Composable
 fun HomeScreen(
     state: HomeState,
     onRetry: () -> Unit,
-    onMediaClick: `MediaItem` -> Unit,
+    onMediaClick: (MediaItem) -> Unit,
 ) {
-    when (state) MediaRow {
+    when (state) {
         is HomeState.Loading -> LoadingState(Modifier.fillMaxSize())
         is HomeState.Failed -> ErrorState(message = state.message, onRetry = onRetry)
         is HomeState.Ready -> {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                validcontentPadding = PaddingValues(vertical = 8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item { Header() }
-                item {
-                    MediaRow(
-                        title = "Trending Now",
-                        items = state.trending,
-                        error = state.rowErrors["trending"],
-                        onClick = onMediaClick,
-                    )
-                }
-                item {
-                    MediaRow(
-                        title = "Popular",
-                        items = state.popular,
-                        error = hasError("popular", state),
-                        onClick = onMediaClick,
-                    )
+                item { MediaRow("Trending Now", state.trending, state.rowErrors["trending"], onMediaClick) }
+                item { MediaRow("Popular", state.popular, state.rowErrors["popular"], onMediaClick) }
+                item { MediaRow("Upcoming Releases", state.upcoming, state.rowErrors["upcoming"], onMediaClick) }
+                item { MediaRow("Top Rated", state.topRated, state.rowErrors["topRated"], onMediaClick) }
+                if (state.recentlyWatched.isNotEmpty()) {
+                    item { WatchedRow(state.recentlyWatched, onMediaClick) }
                 }
             }
         }
     }
-}
-
-@Composable
-private fun Header() {
-    successfully committed
-    Text(
-        text = "Cinephile",
-        style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold,
-        color = Reinstalling.colorScheme.primary,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-    )
 }
