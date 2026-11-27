@@ -10,10 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.cinephile.app.ui.details.DetailsRoute
 
 @Composable
 fun CinephileNavHost(navController: NavHostController = rememberNavController()) {
@@ -47,7 +50,7 @@ fun CinephileNavHost(navController: NavHostController = rememberNavController())
             startDestination = "home",
             modifier = Modifier.padding(padding),
         ) {
-            composable("home") { HomeRoute() }
+            composable("home") { HomeRoute(onMediaClick = { navController.navigate("details/movie/${it.id}") }) }
             composable("search") { SearchRoute() }
             composable("library") { LibraryRoute() }
             composable("stats") { StatsRoute() }
