@@ -1,0 +1,22 @@
+# Cinephile — local configuration template
+#
+# Copy this file to `local.properties` (gitignored) and fill in your values.
+# Every value below can also be provided as an environment variable
+# (useful for CI).
+#
+# NEVER commit real keys to this repository.
+
+# TMDB — required for movie data, posters and trailers.
+# Get a free key at https://www.themoviedb.org/settings/api
+TMDB_API_KEY=
+
+# Supabase — optional, enables cloud sync and authentication.
+# See docs/SUPABASE_SETUP.md for the required table + RLS setup.
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+
+# AI assistant provider — optional, any OpenAI-compatible chat completions endpoint.
+# When absent, the built-in recommendation engine answers assistant queries locally.
+LLM_BASE_URL=
+LLM_API_KEY=
+LLM_MODEL=
