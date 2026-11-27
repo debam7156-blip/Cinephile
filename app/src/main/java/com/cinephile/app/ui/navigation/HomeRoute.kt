@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cinephile.app.domain.model.MediaItem
 import com.cinephile.app.ui.home.HomeScreen
 import com.cinephile.app.ui.home.HomeViewModel
+import com.cinephile.app.ui.home.HomeViewModelFactory
 
 @Composable
 fun HomeRoute(onMediaClick: (MediaItem) -> Unit = {}) {
