@@ -3,6 +3,7 @@ package com.cinephile.app.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinephile.app.core.util.DataResult
+import com.cinephile.app.core.util.humanize
 import com.cinephile.app.data.repository.TmdbRepository
 import com.cinephile.app.data.repository.TrackingRepository
 import com.cinephile.app.domain.model.MediaItem
@@ -15,12 +16,12 @@ import kotlinx.coroutines.launch
 sealed interface HomeState {
     data object Loading : HomeState
     data class Ready(
-        val trending: List<MediaItem>,
-        val popular: List<MediaItem>,
-        val upcoming: List<MediaItem>,
-        val topRated: List<MediaItem>,
-        val recentlyWatched: List<TrackedMedia>,
-        val rowErrors: Map<String, String>,
+        val trending: List<MediaItem> = emptyList(),
+        val popular: List<MediaItem> = emptyList(),
+        val upcoming: List<MediaItem> = emptyList(),
+        val topRated: List<MediaItem> = emptyList(),
+        val recentlyWatched: List<TrackedMedia> = emptyList(),
+        val rowErrors: Map<String, String> = emptyMap(),
     ) : HomeState
     data class Failed(val message: String) : HomeState
 }
@@ -42,19 +43,12 @@ class HomeViewModel(
                     _state.value = s.copy(recentlyWatched = watched.take(15))
                 }
             }
-            tracking.observeWatchlist().collect { wl ->
-                val s = _state.value
-                if (s is HomeState.Ready) {
-                    _state.value = s.copy(popular = s.popular, recentlyWatched = s.recentlyWatched)
-                }
-            }
         }
     }
 
     fun refresh() {
         _state.value = HomeState.Loading
         viewModelScope.launch {
-            val errors = mutableMapOf<String, String>()
             val t = async { safe { tmdb.trendingMovies() } }
             val p = async { safe { tmdb.popularMovies() } }
             val u = async { safe { tmdb.upcomingMovies() } }
@@ -63,30 +57,29 @@ class HomeViewModel(
             val pop = p.await()
             val upc = u.await()
             val top = r.await()
-            if (trend is DataResult.Failure) errors["trending"] = trend.message
-            if (pop is DataResult.Failure) errors["popular"] = pop.message
-            if (upc is DataResult.Failure) errors["upcoming"] = upc.message
-            if (top is DataResult.Failure) errors["topRated"] = top.message
+            val errors = mutableMapOf<String, String>()
+            (trend as? DataResult.Failure)?.let { errors["trending"] = it.message }
+            (pop as? DataResult.Failure)?.let { errors["popular"] = it.message }
+            (upc as? DataResult.Failure)?.let { errors["upcoming"] = it.message }
+            (top as? DataResult.Failure)?.let { errors["topRated"] = it.message }
             _state.value = HomeState.Ready(
-                trending = trend.dataOrEmpty(),
-                popular = pop.dataOrEmpty(),
-                upcoming = upc.dataOrEmpty(),
-                topRated = top.dataOrEmpty(),
-                recentlyWatched = emptyList(),
-                recentlyWatched = emptyList(),
+                trending = list(trend),
+                popular = list(pop),
+                upcoming = list(upc),
+                topRated = list(top),
                 rowErrors = errors,
             )
         }
     }
 
+    private fun list(r: DataResult<List<MediaItem>>): List<MediaItem> =
+        (r as? DataResult.Success)?.data ?: emptyList()
+
     private suspend fun <T> safe(block: suspend () -> DataResult<T>): DataResult<T> =
-        try { block() } catch (t: Throwable) {
+        try {
+            block()
+        } catch (t: Throwable) {
             if (t is kotlinx.coroutines.CancellationException) throw t
-            DataResult.Failure(com.cin ephile.app.core.util.humanize(t, "Request failed."))
+            DataResult.Failure(humanize(t, "Request failed."))
         }
-
-    private fun <T> DataResult<T>.dataOrEmpty(): List<T> =
-        (this as? DataResult.Success)?.data as? List<T> ?: emptyList()
-
-    fun onMediaClick(item: MediaItem) { /* navigation via UI */ }
 }
