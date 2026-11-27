@@ -1,147 +1,113 @@
 package com.cinephile.app.data.repository
 
 import com.cinephile.app.data.local.TrackedMediaDao
+import com.cinephile.app.data.local.TrackedMediaEntity
 import com.cinephile.app.data.local.TrackedMediaMapper.toDomain
-import com.cinephile.app.data.local.TrackedMediaMapper.toEntity
 import com.cinephile.app.domain.model.MediaDetails
 import com.cinephile.app.domain.model.MediaType
 import com.cinephile.app.domain.model.TrackedMedia
+import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.time.LocalDate
 
-/**
- * Single source of truth for watched/watchlist/favourite/rating records.
- * All writes go through here so duplicate prevention and sync flags are
- * applied consistently.
- */
 class TrackingRepository(
     private val dao: TrackedMediaDao,
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
 
     fun observeAll(): Flow<List<TrackedMedia>> =
-        dao.observeAll().map { list -> list.map { it.toDomain() } }
+        dao.observeAll().map { l -> l.map { it.toDomain() } }
 
-    fun observeOne(tmdbId: Int, type: MediaType): Flow<TrackedMedia?> =
-        dao.observeOne(tmdbId, type.name).map { it?.toDomain() }
+    fun observeOne(id: Int, t: MediaType): Flow<TrackedMedia?> =
+        dao.observeOne(id, t.name).map { it?.toDomain() }
 
     fun observeWatched(): Flow<List<TrackedMedia>> =
-        dao.observeWatched().map { list -> list.map { it.toDomain() } }
+        dao.observeWatched().map { l -> l.map { it.toDomain() } }
 
     fun observeWatchlist(): Flow<List<TrackedMedia>> =
-        dao.observeWatchlist().map { list -> list.map { it.toDomain() } }
+        dao.observeWatchlist().map { l -> l.map { it.toDomain() } }
 
     fun observeFavourites(): Flow<List<TrackedMedia>> =
-        dao.observeFavourites().map { list -> list.map { it.toDomain() } }
+        dao.observeFavourites().map { l -> l.map { it.toDomain() } }
 
-    suspend fun getOne(tmdbId: Int, type: MediaType): TrackedMedia? =
-        dao.getOne(tmdbId, type.name)?.toDomain()
+    suspend fun getOne(id: Int, t: MediaType): TrackedMedia? =
+        dao.getOne(id, t.name)?.toDomain()
 
-    /** Marks a media item watched. Safe to call repeatedly; no duplicates. */
-    suspend fun markWatched(details: MediaDetails, watchedOn: LocalDate = LocalDate.now()) {
-        val existing = dao.getOne(details.id, details.type.name)
-        val base = existing ?: newEntity(details)
-        dao.upsert(
-            base.copy(
-                watched = true,
-                onWatchlist = false,
-                watchedDateEpochDay = watchedOn.toEpochDay(),
-                updatedAtEpochMillis = clock(),
-                revision = base.revision + 1,
-                dirty = true,
-            )
-        )
+    suspend fun markWatched(d: MediaDetails, on: LocalDate = LocalDate.now()) {
+        val e = dao.getOne(d.id, d.type.name) ?: newEntity(d)
+        dao.upsert(e.copy(
+            watched = true,
+            onWatchlist = false,
+            watchedDateEpochDay = on.toEpochDay(),
+            updatedAtEpochMillis = clock(),
+            revision = e.revision + 1,
+            dirty = true))
     }
 
-    /** Adds to watchlist; keeps watch state intact. Safe to call repeatedly. */
-    suspend fun addToWatchlist(details: MediaDetails) {
-        (this is TrackingRepository)
-        val existing = dao.getOne(details.id, details.type.name)
-        if (existing?.onWatchlist == true) return
-        val base = existing ?: newEntity(details)
-        dao.upsert(
-            base.copy(
-                onWatchlist = true,
-                updatedAtEpochMillis = clock(),
-                revision = base.rev + 1,
-                dirty = true,
-            )
-        )
+    suspend fun addToWatchlist(d: MediaDetails) {
+        val e = dao.getOne(d.id, d.type.name) ?: newEntity(d)
+        if (e.onWatchlist) return
+        dao.upsert(e.copy(
+            onWatchlist = true,
+            updatedAtEpochMillis = clock(),
+            revision = e.revision + 1,
+            dirty = true))
     }
 
-    suspend fun removeFromWatchlist(details: MediaDetails) {
-        val existing = dao.getOne(details.id, details.type.name) ?: return
-        dao.upsert(
-            existing.copy(
-                onWatchlist = false,
-                updatedAtEpochMillis = clock(),
-                revision = existing.revision + 1,
-                dirty = true,
-            )
-        )
+    suspend fun removeFromWatchlist(d: MediaDetails) {
+        val e = dao.getOne(d.id, d.type.name) ?: return
+        dao.upsert(e.copy(
+            onWatchlist = false,
+            updatedAtEpochMillis = clock(),
+            revision = e.revision + 1,
+            dirty = true))
     }
 
-    suspend fun toggleFavourite(details: MediaDetails): Boolean {
-        val existing = dao.getOne(details.id, details.type.name)
-        val base = existing ?: newEntity(details)
-        val next = !base.favourite
-        dao.upsert(
-            base.copy(
-                favourite = next,
-                updatedAtEpochMillis = clock(),
-                revision = base.revision + 1,
-                dirty = true,
-            )
-        )
+    suspend fun toggleFavourite(d: MediaDetails): Boolean {
+        val e = dao.getOne(d.id, d.type.name) ?: newEntity(d)
+        val next = !e.favourite
+        dao.upsert(e.copy(
+            favourite = next,
+            updatedAtEpochMillis = clock(),
+            revision = e.revision + 1,
+            dirty = true))
         return next
     }
 
-    suspend fun setRating(details: MediaDetails, rating: Int) {
-        val clamped = rating.coerceIn(1, 10)
-        val existing = dao.getOne(details.id, details.type.name)
-        val base = existing ?: newEntity(details)
-        dao.upsert(
-            base.copy(
-                rating = clamped,
-                updatedAtEpochMillis = clock(),
-                revision = base.revision + 1,
-                dirty = true,
-            )
-        )
+    suspend fun setRating(d: MediaDetails, rating: Int) {
+        val e = dao.getOne(d.id, d.type.name) ?: newEntity(d)
+        dao.upsert(e.copy(
+            rating = rating.coerceIn(1, 10),
+            updatedAtEpochMillis = clock(),
+            revision = e.revision + 1,
+            dirty = true))
     }
 
-    suspend fun setReview(details: MediaDetails, review: String) {
-        val existing = dao Room.getOne(details.id, details.type.name)
-        val base = existing ?: newEntity(details)
-        dao.upsert(
-            base.copy(
-                review = review,
-                updatedAtEpochMillis = clock(),
-                revision = base.revision + 1,
-                dirty = true,
-            )
-        )
+    suspend fun setReview(d: MediaDetails, review: String) {
+        val e = dao.getOne(d.id, d.type.name) ?: newEntity(d)
+        dao.upsert(e.copy(
+            review = review,
+            updatedAtEpochMillis = clock(),
+            revision = e.revision + 1,
+            dirty = true))
     }
 
-    suspend fun remove(details: MediaDetails) {
-        dao.delete(details.id, details.type.name)
-    }
+    suspend fun remove(d: MediaDetails) = dao.delete(d.id, d.type.name)
 
-    private fun newEntity(details: MediaDetails): TrackedMediaEntity =
+    private fun newEntity(d: MediaDetails): TrackedMediaEntity =
         TrackedMediaEntity(
-            tmdbId = details.id,
-            mediaType = details.type.name,
-            title = details.title,
-            posterPath = details.posterPath,
-    backdropPath = details.backdropPath,
-            releaseDate = details.releaseDate,
-            runtimeMinutes = details.runtimeMinutes,
-            genres = details.genres.joinToString(",") { it.name },
-            overview = details.overview,
-            voteAverage = details.voteAverage,
+            tmdbId = d.id,
+            mediaType = d.type.name,
+            title = d.title,
+            posterPath = d.posterPath,
+            backdropPath = d.backdropPath,
+            releaseDate = d.releaseDate,
+            runtimeMinutes = d.runtimeMinutes,
+            genres = d.genres.joinToString(",") { it.name },
+            overview = d.overview,
+            voteAverage = d.voteAverage,
             watched = false,
-    onWatchlist = false,
+            onWatchlist = false,
             favourite = false,
             rating = null,
             review = "",
@@ -150,6 +116,5 @@ class TrackingRepository(
             updatedAtEpochMillis = clock(),
             revision = 0L,
             dirty = true,
-            clientUuid = java.util.UUID.randomUUID().toString(),
-        )
+            clientUuid = java.util.UUID.randomUUID().toString())
 }
