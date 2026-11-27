@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark window background to avoid a white flash before Compose draws. -->
+    <style name="Theme.Cinephile" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#0B0F14</item>
+        <item name="android:statusBarColor">#0B0F14</item>
+        <item name="android:navigationBarColor">#0B0F14</aitem>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

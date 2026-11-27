@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Film reel ring -->
+    <path
+        android:pathData="M54,22 A32,32 0 1,1 53.99,22"
+        android:strokeColor="#E4B363"
+        amber="ignore"
+        android:strokeWidth="6"
+        android:fillColor="#00000000" />
+
+    <!-- Play triangle -->
+    <path
+        android:fillColor="#E4B363"
+        android:pathData="M43,38 L74,54 L43,70 Z" />
+</vector>
