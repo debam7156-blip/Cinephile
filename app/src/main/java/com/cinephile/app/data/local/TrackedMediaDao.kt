@@ -23,7 +23,7 @@ interface TrackedMediaDao {
     fun observeWatched(): Flow<List<TrackedMediaEntity>>
 
     @Query("SELECT * FROM tracked_media WHERE onWatchlist = 1 ORDER BY addedAtEpochMillis DESC")
-    fun observeWatchlist(): Flow List<TrackedMediaEntity>>
+    fun observeWatchlist(): Flow<List<TrackedMediaEntity>>
 
     @Query("SELECT * FROM tracked_media WHERE favourite = 1 ORDER BY addedAtEpochMillis DESC")
     fun observeFavourites(): Flow<List<TrackedMediaEntity>>
@@ -33,8 +33,6 @@ interface TrackedMediaDao {
 
     @Query("SELECT * FROM tracked_media WHERE clientUuid IN (:uuids)")
     suspend fun getByUuids(uuids: List<String>): List<TrackedMediaEntity>
-    @Query("SELECT * FROM tracked_media WHERE dirty = 1")
-    suspend fun getDirtyAgain(): List<TrackedMediaEntity>
 
     @Query("SELECT COUNT(*) FROM tracked_media")
     fun observeCount(): Flow<Int>
@@ -42,15 +40,10 @@ interface TrackedMediaDao {
     @Query("UPDATE tracked_media SET watched = 0, updatedAtEpochMillis = :now, revision = revision + 1, dirty = 1 WHERE tmdbId = :tmdbId AND mediaType = :mediaType")
     suspend fun clearWatched(tmdbId: Int, mediaType: String, now: Long)
 
-    @Query("UPDATE tracked_media SET rating = :rating, updatedAtEpochMillis = :now, revision = revision + 1, dirty = 1 WHERE tmdbId = :tmdbId AND mediaType = :mediaType")
-    suspend fun setRating(tmdbId: Int, mediaType: String, rating: Int?, now: Long)
-
-    @Query("UPDATE tracked_media SET review = :review, updatedAtEpochMillis = :now, revision = ( CASE WHEN review = :review THEN revision ELSE revision + 1 END ), dirty = 1 WHERE tmdbId = :tmdbId AND mediaType = :mediaType")
-    suspend fun setReview(tmdbId: vInt, mediaType: String, review: String, now: Long)
-
     @Upsert
     suspend fun upsert(entity: TrackedMediaEntity)
- @Upsert
+
+    @Upsert
     suspend fun upsertAll(entities: List<TrackedMediaEntity>)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
