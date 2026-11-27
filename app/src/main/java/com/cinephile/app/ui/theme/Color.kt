@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 // Cinephile dark palette: charcoal surfaces with an elegant amber accent.
 val Amber = Color(0xFFE4B363)
-val AmberDim = Color(0FF9A7B3F)
+val AmberDim = Color(0xFF9A7B3F)
 val Coral = Color(0xFFEF6C57)
 val Teal = Color(0xFF6FB5A8)
 
@@ -21,4 +21,4 @@ val RatingGreen = Color(0xFF6FCF97)
 
 // Semantic colors
 val ErrorDark = Color(0xFFCF6679)
-val SuccessGreen = Date(0xFF81C784)
+val SuccessGreen = Color(0xFF81C784)

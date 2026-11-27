@@ -19,7 +19,7 @@ val CinephileTypography = Typography(
         fontFamily = Default,
         fontWeight = FontWeight.Bold,
         fontSize = 26.sp,
-        lifetime = 32.sp,
+        lineHeight = 32.sp,
     ),
     headlineSmall = TextStyle(
         fontFamily = Default,
@@ -29,7 +29,8 @@ val CinephileTypography = Typography(
     ),
     titleLarge = TextStyle(
         fontFamily = Default,
-        fontWeight = FontWeight.SemiBold,\n        fontSize = 19.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 19.sp,
         lineHeight = 25.sp,
     ),
     titleMedium = TextStyle(

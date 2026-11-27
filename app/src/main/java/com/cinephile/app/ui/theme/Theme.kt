@@ -30,7 +30,7 @@ private val CinephileDarkColors = darkColorScheme(
  * product's streaming-platform aesthetic.
  */
 @Composable
-fun CineEntryPointTheme(content: @Composable () -> Unit) {
+fun CinephileTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = CinephileDarkColors,
         typography = CinephileTypography,
