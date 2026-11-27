@@ -2,15 +2,14 @@ package com.cinephile.app.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.cinephile.app.AppContainer
-import com.cinephile.app.CinephileApp
+import com.cinephile.app.CinephileApplication
 
 /** Creates ViewModels with repositories from the application container. */
 class HomeViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T =
         HomeViewModel(
-            tmdb = CinephileApp.container.tmdbRepository,
-            tracking = CinephileApp.container.trackingRepository,
+            tmdb = CinephileApplication.container.tmdbRepository,
+            tracking = CinephileApplication.container.trackingRepository,
         ) as T
 }
