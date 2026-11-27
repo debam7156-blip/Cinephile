@@ -49,7 +49,7 @@ private fun CinephileApp(vm: LibraryViewModel) {
         topBar = { TopAppBar(title = { Text("CINEPHILE", fontWeight = FontWeight.Black) }, actions = { Text("FILM JOURNAL", style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(end = 16.dp)) }) },
         bottomBar = {
             NavigationBar {
-                Tab.entries.forEach { item ->
+                listOf(Tab.DISCOVER, Tab.LIBRARY, Tab.STATS).forEach { item ->
                     val icon = when (item) { Tab.DISCOVER -> Icons.Default.Explore; Tab.LIBRARY -> Icons.Default.CollectionsBookmark; Tab.STATS -> Icons.Default.BarChart }
                     NavigationBarItem(selected = tab == item, onClick = { tab = item }, icon = { Icon(icon, null) }, label = { Text(item.label) })
                 }
@@ -94,7 +94,7 @@ private fun Library(movies: List<MovieEntry>, modifier: Modifier, edit: (MovieEn
         Text("My library", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("ALL", MovieEntry.STATUS_WATCHED, MovieEntry.STATUS_WATCHLIST).forEach { value ->
-                FilterChip(filter == value, { filter = value }, label = { Text(when (value) { "ALL" -> "All"; MovieEntry.STATUS_WATCHED -> "Watched"; else -> "Watchlist" }) })
+                FilterChip(selected = filter == value, onClick = { filter = value }, label = { Text(when (value) { "ALL" -> "All"; MovieEntry.STATUS_WATCHED -> "Watched"; else -> "Watchlist" }) })
             }
         }
         if (filtered.isEmpty()) Empty("Nothing here yet", "Use + to add films to your watched log or watchlist.")
