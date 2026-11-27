@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.cinephile.app.domain.model.MediaType
 import com.cinephile.app.ui.details.DetailsRoute
 
 @Composable
@@ -55,6 +56,20 @@ fun CinephileNavHost(navController: NavHostController = rememberNavController())
             composable("library") { LibraryRoute() }
             composable("stats") { StatsRoute() }
             composable("assistant") { AssistantRoute() }
+            composable(
+                route = "details/{type}/{id}",
+                arguments = listOf(
+                    navArgument("type") { type = NavType.StringType },
+                    navArgument("id") { type = NavType.IntType },
+                ),
+            ) { entry ->
+                val type = when (entry.arguments?.getString("type")) {
+                    "tv" -> MediaType.TV
+                    else -> MediaType.MOVIE
+                }
+                val id = entry.arguments?.getInt("id") ?: 0
+                DetailsRoute(id = id, type = type)
+            }
         }
     }
 }
