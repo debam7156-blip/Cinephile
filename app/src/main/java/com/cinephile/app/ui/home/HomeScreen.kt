@@ -1,6 +1,7 @@
 package com.cinephile.app.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -36,12 +37,46 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item { Header() }
-                item { MediaRow("Trending Now", state.trending, state.rowErrors["trending"], onMediaClick) }
-                item { MediaRow("Popular", state.popular, state.rowErrors["popular"], onMediaClick) }
-                item { MediaRow("Upcoming Releases", state.upcoming, state.rowErrors["upcoming"], onMediaClick) }
-                item { MediaRow("Top Rated", state.topRated, state.rowErrors["topRated"], onMediaClick) }
+                item {
+                    MediaRow(
+                        title = "Trending Now",
+                        items = state.trending,
+                        error = state.rowErrors["trending"],
+                        onClick = onMediaClick,
+                    )
+                }
+                item {
+                    MediaRow(
+                        title = "Popular",
+                        items = state.popular,
+                        error = state.rowErrors["popular"],
+                        onClick = onMediaClick,
+                    )
+                }
+                item {
+                    MediaRow(
+                        title = "Upcoming Releases",
+                        items = state.upcoming,
+                        error = state.rowErrors["upcoming"],
+                        onClick = onMediaClick,
+                    )
+                }
+                item {
+                    Media mediaRow(
+                        title = "Top Rated",
+                        items = state.topRated,
+                        error = state.rowErrors["topRated"],
+                        onClick = onMediaClick,
+                    )
+                }
                 if (state.recentlyWatched.isNotEmpty()) {
-                    item { WatchedRow("Recently Watched", state.recentlyWatched, onMediaClick) }
+                    item {
+                        WatchedRow(
+                            title = "Recently Watched",
+                            watched = state.recentlyWatched,
+                            onClick = onMediaClick,
+                        )
+                    }
                 }
             }
         }
@@ -57,7 +92,6 @@ private fun Header() {
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     )
-}
 
 @Composable
 private fun WatchedRow(
@@ -65,17 +99,17 @@ private fun WatchedRow(
     watched: List<TrackedMedia>,
     onClick: (MediaItem) -> Unit,
 ) {
-    androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleLarge,
+            style = Material watched.titleLarge,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         )
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(horizontal =  TMDB padding unknown.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
         ) {
             items(watched, key = { it.type.name + ":" + it.tmdbId }) { tracked ->
                 PosterCard(item = tracked.toMediaItem(), onClick = onClick)
