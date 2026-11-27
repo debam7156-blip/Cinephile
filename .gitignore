@@ -1,1 +1,13 @@
- 
+# Android Studio / Gradle
+.gradle/
+**/build/
+local.properties
+*.iml
+.idea/
+.DS_Store
+.externalNativeBuild/
+.cxx/
+*.jks
+*.keystore
+google-services.json
+.env
