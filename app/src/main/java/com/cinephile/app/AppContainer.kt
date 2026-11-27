@@ -1,13 +1,27 @@
 package com.cinephile.app
 
 import android.content.Context
+import com.cinephile.app.BuildConfig
+import com.cinephile.app.data.local.CinephileDatabase
+import com.cinephile.app.data.remote.NetworkModule
+import com.cinephile.app.data.repository.DiscoverRepository
+import com.cinephile.app.data.repository.TmdbRepository
+import com.cinephile.app.data.repository.TrackingRepository
 
 /**
- * Manual dependency container.
- *
- * Cinephile intentionally uses constructor injection with a single container
- * instead of a codegen-backed DI framework: it keeps the build graph small,
- * the wiring explicit, and every dependency trivially replaceable in tests.
- * The container is expanded as features land in subsequent development stages.
+ * Manual dependency container: explicit wiring, no codegen, trivially testable.
  */
-class AppContainer(appContext: Context)
+class AppContainer(context: Context) {
+
+    val database: CinephileDatabase = CinephileDatabase.get(context)
+
+    val tmdbApi = NetworkModule.tmdbApi()
+
+    private val apiKeyPresent: () -> Boolean = { BuildConfig.TMDB_API_KEY.isNotBlank() }
+
+    val tmdbRepository = TmdbRepository(tmdbApi, apiKeyPresent)
+
+    val discoverRepository = DiscoverRepository(tmdbApi, apiKeyPresent)
+
+    val trackingRepository = TrackingRepository(database.trackedMediaDao())
+}
